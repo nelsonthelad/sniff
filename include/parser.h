@@ -32,8 +32,8 @@ private:
     // Helper methods for parsing specific protocol headers
     void parseEthernetHeader(const u_char* packet, PacketInfo& info);
     void parseIPHeader(const u_char* packet, PacketInfo& info);
-    void parseTCPHeader(const u_char* packet, const struct iphdr* ipHeader, PacketInfo& info);
-    void parseUDPHeader(const u_char* packet, const struct iphdr* ipHeader, PacketInfo& info);
+    void parseTCPHeader(const u_char* packet, const struct ip* ipHeader, PacketInfo& info);
+    void parseUDPHeader(const u_char* packet, const struct ip* ipHeader, PacketInfo& info);
 };
 
 #endif // PARSER_H

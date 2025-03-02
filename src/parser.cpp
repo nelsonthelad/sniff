@@ -50,27 +50,27 @@ void Parser::parseEthernetHeader(const u_char* packet, PacketInfo& info) {
 }
 
 void Parser::parseIPHeader(const u_char* packet, PacketInfo& info) {
-    const struct iphdr* ipHeader = reinterpret_cast<const struct iphdr*>(packet);
+    const struct ip* ipHeader = reinterpret_cast<const struct ip*>(packet);
     
     // Extract source and destination IP addresses
     char sourceIP[INET_ADDRSTRLEN];
     char destIP[INET_ADDRSTRLEN];
     
-    inet_ntop(AF_INET, &(ipHeader->saddr), sourceIP, INET_ADDRSTRLEN);
-    inet_ntop(AF_INET, &(ipHeader->daddr), destIP, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(ipHeader->ip_src), sourceIP, INET_ADDRSTRLEN);
+    inet_ntop(AF_INET, &(ipHeader->ip_dst), destIP, INET_ADDRSTRLEN);
     
     info.sourceIP = sourceIP;
     info.destIP = destIP;
     
     // Determine the protocol
-    switch (ipHeader->protocol) {
+    switch (ipHeader->ip_p) {
         case IPPROTO_TCP:
             info.protocol = "TCP";
-            parseTCPHeader(packet + (ipHeader->ihl * 4), ipHeader, info);
+            parseTCPHeader(packet + (ipHeader->ip_hl * 4), ipHeader, info);
             break;
         case IPPROTO_UDP:
             info.protocol = "UDP";
-            parseUDPHeader(packet + (ipHeader->ihl * 4), ipHeader, info);
+            parseUDPHeader(packet + (ipHeader->ip_hl * 4), ipHeader, info);
             break;
         case IPPROTO_ICMP:
             info.protocol = "ICMP";
@@ -81,18 +81,18 @@ void Parser::parseIPHeader(const u_char* packet, PacketInfo& info) {
     }
 }
 
-void Parser::parseTCPHeader(const u_char* packet, const struct iphdr* ipHeader, PacketInfo& info) {
+void Parser::parseTCPHeader(const u_char* packet, const struct ip* ipHeader, PacketInfo& info) {
     const struct tcphdr* tcpHeader = reinterpret_cast<const struct tcphdr*>(packet);
     
     // Extract source and destination ports
-    info.sourcePort = ntohs(tcpHeader->source);
-    info.destPort = ntohs(tcpHeader->dest);
+    info.sourcePort = ntohs(tcpHeader->th_sport);
+    info.destPort = ntohs(tcpHeader->th_dport);
 }
 
-void Parser::parseUDPHeader(const u_char* packet, const struct iphdr* ipHeader, PacketInfo& info) {
+void Parser::parseUDPHeader(const u_char* packet, const struct ip* ipHeader, PacketInfo& info) {
     const struct udphdr* udpHeader = reinterpret_cast<const struct udphdr*>(packet);
     
     // Extract source and destination ports
-    info.sourcePort = ntohs(udpHeader->source);
-    info.destPort = ntohs(udpHeader->dest);
+    info.sourcePort = ntohs(udpHeader->uh_sport);
+    info.destPort = ntohs(udpHeader->uh_dport);
 }

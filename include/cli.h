@@ -5,6 +5,7 @@
 #include <vector>
 #include <functional>
 #include "sniffer.h"
+#include "parser.h"
 
 struct SnifferConfig {
     std::string interface;

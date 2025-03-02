@@ -4,7 +4,7 @@ LIBS = -lpcap
 
 SRC = src/main.cpp src/sniffer.cpp src/parser.cpp src/logger.cpp src/cli.cpp
 OBJ = $(SRC:.cpp=.o)
-EXEC = packet_sniffer
+EXEC = sniff
 
 all: $(EXEC)
 

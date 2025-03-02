@@ -27,7 +27,7 @@ int main() {
 +-----------------------------+ 
    )" << std::endl;
     
-    std::cout << "Packet Sniffer v1.0" << std::endl;
+    std::cout << "Sniff v1.0" << std::endl;
     std::cout << "A simple network packet capture and analysis tool" << std::endl;
     
     // Register signal handler for Ctrl+C
