@@ -33,7 +33,7 @@ brew install libpcap
 
 ```bash
 git clone https://github.com/nelsonthelad/sniff.git
-cd packet_sniffer
+cd sniff
 make
 ```
 
@@ -42,7 +42,7 @@ make
 The packet sniffer requires root/administrator privileges to capture packets:
 
 ```bash
-sudo ./packet_sniffer
+sudo ./sniff
 ```
 
 Follow the on-screen prompts to:
