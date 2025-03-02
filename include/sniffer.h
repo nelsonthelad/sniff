@@ -4,6 +4,7 @@
 #include <pcap.h>
 #include <string>
 #include <functional>
+#include <vector>
 
 class Sniffer {
 public:
@@ -14,7 +15,7 @@ public:
     bool init(const std::string& interface);
     
     // Start capturing packets with a callback function
-    bool startSniffing(std::function<void(const u_char*, const struct pcap_pkthdr*)> callback);
+    bool startSniffing(std::function<void(const u_char*, const struct pcap_pkthdr*)> callback, volatile sig_atomic_t& externalRunning);
     
     // Stop the packet capture
     void stopSniffing();

@@ -3,6 +3,7 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <csignal>
 
 Sniffer::Sniffer() : handle(nullptr), running(false) {
     // Initialize errbuf
@@ -29,7 +30,7 @@ bool Sniffer::init(const std::string& interface) {
         interface.c_str(),  // device name
         BUFSIZ,             // snapshot length
         1,                  // promiscuous mode
-        1000,               // read timeout (ms)
+        100,                // read timeout (ms) - reduced for better responsiveness
         errbuf              // error buffer
     );
 
@@ -49,7 +50,7 @@ bool Sniffer::init(const std::string& interface) {
     return true;
 }
 
-bool Sniffer::startSniffing(std::function<void(const u_char*, const struct pcap_pkthdr*)> callback) {
+bool Sniffer::startSniffing(std::function<void(const u_char*, const struct pcap_pkthdr*)> callback, volatile sig_atomic_t& externalRunning) {
     if (!handle) {
         std::cerr << "Sniffer not initialized" << std::endl;
         return false;
@@ -61,25 +62,55 @@ bool Sniffer::startSniffing(std::function<void(const u_char*, const struct pcap_
     }
 
     running = true;
+    std::cout << "Packet capture started. Press Ctrl+C to stop." << std::endl;
 
     // Start packet capture loop
-    struct pcap_pkthdr header;
+    struct pcap_pkthdr* header;
     const u_char* packet;
 
-    while (running) {
-        packet = pcap_next(handle, &header);
-        if (packet) {
-            callback(packet, &header);
+    while (running && externalRunning) {
+        // Check the external running flag first
+        if (!externalRunning) {
+            std::cout << "External stop signal received." << std::endl;
+            break;
         }
-        // Small delay to prevent CPU hogging
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        // Use pcap_next_ex with a short timeout
+        int res = pcap_next_ex(handle, &header, &packet);
+        
+        // Check for errors or timeout
+        if (res == 0) {
+            // Timeout elapsed without receiving a packet
+            continue;
+        } else if (res == -1) {
+            // Error occurred
+            std::cerr << "Error reading packet: " << pcap_geterr(handle) << std::endl;
+            break;
+        } else if (res == -2) {
+            // End of pcap file (not applicable for live capture)
+            break;
+        }
+        
+        // Process the packet if we got one
+        if (packet && running && externalRunning) {
+            callback(packet, header);
+        }
+        
+        // Check again if we should continue running
+        if (!externalRunning) {
+            std::cout << "External stop signal received during processing." << std::endl;
+            break;
+        }
     }
 
+    std::cout << "Packet capture loop exited" << std::endl;
+    running = false;
     return true;
 }
 
 void Sniffer::stopSniffing() {
     running = false;
+    std::cout << "Stopping sniffer..." << std::endl;
 }
 
 std::vector<std::string> Sniffer::getInterfaces() {
