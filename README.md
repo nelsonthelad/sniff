@@ -1,4 +1,4 @@
-# Packet Sniffer
+# Sniff
 
 A simple terminal-based packet sniffer for capturing and analyzing network traffic.
 
@@ -63,21 +63,6 @@ The packet sniffer logs captured packets to a CSV file with the following column
 - Destination Port
 - Protocol
 - Packet Size (bytes)
-
-## Project Structure
-
-- `src/` - Source files
-  - `main.cpp` - Entry point
-  - `sniffer.cpp` - Packet capture using libpcap
-  - `parser.cpp` - Packet header parsing
-  - `logger.cpp` - Packet logging to file
-  - `cli.cpp` - Command-line interface
-- `include/` - Header files
-  - `sniffer.h`
-  - `parser.h`
-  - `logger.h`
-  - `cli.h`
-- `Makefile` - Build configuration
 
 ## Disclaimer
 
